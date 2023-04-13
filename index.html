@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      //1.	Створити клас, що дозволяє виконувати такі операції над масивами: знаходження кількості додатних, кількості від’ємних, кількість входжень деякого числа (статичні методи)
+
+      class CalcArray {
+        static getPositives(arr) {
+          return arr.reduce(
+            (prevValue, el) => (el > 0 ? ++prevValue : prevValue),
+            0
+          );
+        }
+        static getNegatives(arr) {
+          return arr.reduce(
+            (prevValue, el) => (el < 0 ? ++prevValue : prevValue),
+            0
+          );
+        }
+        static getNumberOfValue(arr, value) {
+          return arr.reduce(
+            (prevValue, el) => (el === value ? ++prevValue : prevValue),
+            0
+          );
+        }
+      }
+      const arr = [-12, 0, 10, -5, 7, 45, 43, -3, 0];
+      console.log(CalcArray.getPositives(arr));
+      console.log(CalcArray.getNegatives(arr));
+      console.log(CalcArray.getNumberOfValue(arr, 0));
+
+      //==============================================================
+
+      //2.	Створити службове авто (водій, марка, номер). Створити клас таким чином, щоб можна було створити тільки один екземпляр цього класу.
+
+      class CompanyAuto {
+        static companyAutoRef;
+        constructor(driver, make, licensePlate) {
+          if (CompanyAuto.companyAutoRef) return CompanyAuto.companyAutoRef;
+          this.driver = driver;
+          this.make = make;
+          this.licensePlate = licensePlate;
+          CompanyAuto.companyAutoRef = this;
+        }
+      }
+      //=====================================================================
+
+      //3.	Створити клас Нагадувач. Кожні вказані кількості секунд (використати setInterval) програма нагадує про якусь подію (це просто текст) і також виводиться порядковий номер скільки раз вже нагадування було. Зробити так, щоб неможна було зробити одночасно декілька об’єктів-нагадувачів. Методи зупинки таймера, метод зміни повідомлення без зупинки таймера.
+
+      class Reminder {
+        static reminderRef;
+        constructor(text, interval) {
+          if (Reminder.reminderRef) return Reminder.reminderRef;
+          this.text = text;
+          this.interval = interval;
+          this.timer;
+          Reminder.reminderRef = this;
+        }
+        toString() {
+          return this.text;
+        }
+        displayText() {
+          let counter = 1;
+          this.timer = setInterval(() => {
+            document.write(`${this} - ${counter}times,<br>`);
+            counter++;
+          }, this.interval * 1000);
+        }
+        textChange(newMsg) {
+          this.text = newMsg;
+        }
+        textStop(time) {
+          setTimeout(() => clearInterval(this.timer), time * 1000);
+        }
+      }
+
+      // let remind = new Reminder("Brush your teeth", 3);
+      // remind.displayText();
+      // remind.textStop(15);
+      // setTimeout(() => remind.textChange("Bye some beer"), 10000);
+
+      //==========================================================
+
+      //4.	Склад. База товарів, які зберігаються на складі: назва товару, одиниця виміру, кількість, фірма виробник (назва, реєстраційний номер). Організувати реєстрацію/відвантаження товарів, фільтрація за назвою товару, фільтрація за назвою фірми
+
+      class Manufacturer {
+        constructor(title, regNumber) {
+          this.title = title;
+          this.regNumber = regNumber;
+        }
+      }
+
+      class Product {
+        constructor(title, measure, manTitle, regNumber) {
+          this.title = title;
+          this.measure = measure;
+          this.manufacturer = new Manufacturer(manTitle, regNumber);
+        }
+      }
+      class Warehouse {
+        constructor() {
+          this.products = [];
+        }
+        addProduct(product, amount) {
+          product.amount = amount;
+          this.products.push(product);
+        }
+        shipment(title, amount) {
+          let productIndex = this.products.findIndex(
+            (product) => product.title === title
+          );
+          if (productIndex === -1) alert("Product is not in warehouse");
+          else if (this.products[productIndex].amount < amount) {
+            alert(
+              `Products amount is less than required possible to ship -${this.products[productIndex].amount}-${this.products[productIndex].measure}`
+            );
+            this.products.splice(productIndex, 1);
+          } else if (this.products[productIndex].amount === amount)
+            this.products.splice(productIndex, 1);
+          else this.products[productIndex].amount -= amount;
+        }
+        filterByTitle(title) {
+          return this.products.filter((product) => product.title === title);
+        }
+        filterByManufecturer(manTitle) {
+          return this.products.filter(
+            (product) => product.manufacturer.title === manTitle
+          );
+        }
+      }
+
+      // let warehouse = new Warehouse();
+      // console.log(warehouse);
+      // warehouse.addProduct(
+      //   new Product("Cola", "bottle 0.5l", "Coca-cola", "5678"),
+      //   100
+      // );
+      // warehouse.addProduct(
+      //   new Product("Whiskey Jameson", "bottle 0.7l", "Jameson INC", "4378"),
+      //   150
+      // );
+      // warehouse.addProduct(
+      //   new Product("Beer Heineken", "bottle 0.33l", "Haineken INC", "3289"),
+      //   500
+      // );
+      // // warehouse.shipment("Beer Heineken", 550);
+      // warehouse.shipment("Beer Heineken", 450);
+      // console.log(warehouse);
+
+      // console.log(warehouse.filterByManufecturer("Coca-cola"));
+
+      //========================================================
+      //5.	Особиста бібліотека. Картотека домашньої бібліотеки: дані книги (автори (піб, рік народження, короткий опис), назва книги, жанр, видавництво (назва, реєстраційний номер, рік засування)). Реалізувати розділи бібліотеки (спеціальна література, хобі, домашнє господарство і т.д.), походження книги і наявність на даний час. Організувати додавання/вилучення книг та  вибір книг за назвою, за ПІБ автора, за видавництвом.
+
+      class Author {
+        constructor(fullname, birthYear, description) {
+          this.fullname = fullname;
+          this.birthYear = birthYear;
+          this.description = description;
+        }
+      }
+      let authorArr = [
+        new Author("J.R.R. Tolkien", "1892", "fantasy writer"),
+        new Author("Alex Carter", "1973", "industry literature"),
+        new Author("Gary Althen", "1965", "household advices"),
+      ];
+
+      class Publishing {
+        constructor(title, id, year) {
+          this.title = title;
+          this.id = id;
+          this.year = year;
+        }
+      }
+      let publishHouses = [
+        new Publishing("Starbook", "123", "1989"),
+        new Publishing("Sunrise", "456", "1998"),
+        new Publishing("Woodriver", "789", "2005"),
+      ];
+      class Book {
+        constructor(
+          bookTitle,
+          genre,
+          author,
+          publishHouse,
+          authorArr,
+          publishHouses
+        ) {
+          this.title = bookTitle;
+          this.genre = genre;
+          this.author = authorArr.find((el) => el.fullname === author);
+          this.publishHouse = publishHouses.find(
+            (el) => el.title === publishHouse
+          );
+        }
+      }
+
+      let books = [
+        new Book(
+          "Lord of the rings",
+          "fantasy",
+          "J.R.R. Tolkien",
+          "Starbook",
+          authorArr,
+          publishHouses
+        ),
+        new Book(
+          "Electric troubleshooting",
+          "industry",
+          "Alex Carter",
+          "Woodriver",
+          authorArr,
+          publishHouses
+        ),
+        new Book(
+          "Growing tomatoes at home",
+          "household",
+          "Gary Althen",
+          "Sunrise",
+          authorArr,
+          publishHouses
+        ),
+        new Book(
+          "Hobbit",
+          "fantasy",
+          "J.R.R. Tolkien",
+          "Starbook",
+          authorArr,
+          publishHouses
+        ),
+      ];
+      console.log(authorArr);
+      console.log(authorArr.filter((el) => el.fullname === "J.R.R. Tolkien"));
+
+      console.log(books);
+
+      class HomeLibrary {
+        constructor() {
+          this.library = [
+            { specialLiterature: [] },
+            { hobby: [] },
+            { household: [] },
+          ];
+        }
+        addBook(bookTitle, bookArr) {
+          const findBook = JSON.parse(
+            JSON.stringify(bookArr.find((el) => el.title === bookTitle))
+          );
+          const librarySection = parseInt(
+            prompt(
+              `${bookTitle} : Choose book section 1-special literature; 2- hobby; 3- household`
+            )
+          );
+          const bookOrigin = prompt("Add book origin");
+          const bookAvailability = confirm("Is book available");
+          findBook.origin = bookOrigin;
+          findBook.bookAvailability = bookAvailability
+            ? "available"
+            : "Not available";
+          for (const key in this.library[librarySection - 1]) {
+            this.library[librarySection - 1][key].push(findBook);
+          }
+        }
+        removeBook(bookTitle) {
+          for (let i = 0; i < this.library.length; i++) {
+            for (const key in this.library[i]) {
+              this.library[i][key] = this.library[i][key].filter(
+                (el) => el.title !== bookTitle
+              );
+            }
+          }
+        }
+        getBookByTitle(title) {
+          let book;
+          for (let i = 0; i < this.library.length; i++) {
+            for (const key in this.library[i]) {
+              if (this.library[i][key].some((el) => el.title === title)) {
+                book = this.library[i][key].find((el) => el.title === title);
+                return book;
+              }
+            }
+          }
+        }
+        getBooksByAuthor(name) {
+          let books = [];
+          for (let i = 0; i < this.library.length; i++) {
+            for (const key in this.library[i]) {
+              if (
+                this.library[i][key].some((el) => el.author.fullname === name)
+              ) {
+                books = books.concat(
+                  this.library[i][key].filter(
+                    (el) => el.author.fullname === name
+                  )
+                );
+              }
+            }
+          }
+          return books;
+        }
+        getBooksByPublishing(publish) {
+          let books = [];
+          for (let i = 0; i < this.library.length; i++) {
+            for (const key in this.library[i]) {
+              if (
+                this.library[i][key].some(
+                  (el) => el.publishHouse.title === publish
+                )
+              ) {
+                books = books.concat(
+                  this.library[i][key].filter(
+                    (el) => el.publishHouse.title === publish
+                  )
+                );
+              }
+            }
+          }
+          return books;
+        }
+      }
+
+      // let library = new HomeLibrary();
+      // library.addBook("Lord of the rings", books);
+      // library.addBook("Electric troubleshooting", books);
+      // library.addBook("Growing tomatoes at home", books);
+      // library.addBook("Hobbit", books);
+      // console.log(library);
+      // //library.removeBook("Lord of the rings");
+      // console.log(library);
+      // const book = library.getBookByTitle("Growing tomatoes at home");
+      // console.log(book);
+      // const booksAuthor = library.getBooksByAuthor("J.R.R. Tolkien");
+      // console.log(booksAuthor);
+      // const booksPublish = library.getBooksByPublishing("Starbook");
+      // console.log(booksPublish);
+
+      //===================================================================
+      // 		6.	Дано два класи MultChecker (клас для перевірки таблиці множення - рандомно генеруються числа, які треба перемножати), AddChecker (клас для перевірки додавання - рандомно генеруються числа у заданому діапазоні, які треба додавати). Обидва класи надсилають результати тестування об'єкту класу Hystory, який зберігає історію тестування у масиві у вигляді об'єктів
+      // Приклад.
+      // testsList= [
+      //    {firstNum:1, secondNum:5,opration:’*’, userAnswer:7, correctAnswer:5},
+      //    {firstNum:3, secondNum:4,opration:’+’, userAnswer:7, correctAnswer:7},
+      // ]
+      // Можна створити окремий клас TestData, який описує один такий тест і у якому будуть ці поля.
+      // Розробити клас TestManager, який використовуючи ці класи за допомогою таймера періодично генерує якісь N задач (рандомно вибираємо, що опитувати: додавання чи множення) і проводить опитування. Результати тестування додаються в об’єкт History.  Зробити так, щоб об'єкт такого класу можна було створити тільки один. Коли зроблено ці N задач вивести усю історію на екран.
+
+      class MultChecker {
+        static getRandomNum() {
+          return 1 + Math.floor(Math.random() * (10 - 1 + 1));
+        }
+        static multCheck() {
+          let a = this.getRandomNum();
+          let b = this.getRandomNum();
+          let wrightAnswer = a * b;
+          let userAnswer = parseInt(prompt(`${a} * ${b} =`));
+          return {
+            firstNum: a,
+            secondNum: b,
+            operation: "*",
+            userAnswer: userAnswer,
+            correctAnswer: wrightAnswer,
+          };
+        }
+      }
+
+      class AddChecker {
+        static addCheck() {
+          let a = MultChecker.getRandomNum();
+          let b = MultChecker.getRandomNum();
+          let wrightAnswer = a + b;
+          let userAnswer = parseInt(prompt(`${a} + ${b} =`));
+          return {
+            firstNum: a,
+            secondNum: b,
+            operation: "+",
+            userAnswer: userAnswer,
+            correctAnswer: wrightAnswer,
+          };
+        }
+      }
+      class Hystory {
+        static testList = [];
+        static multiply() {
+          let mult = MultChecker.multCheck();
+          Hystory.testList.push(mult);
+        }
+        static add() {
+          let add = AddChecker.addCheck();
+          Hystory.testList.push(add);
+        }
+        static toString() {
+          for (let i = 0; i < this.testList.length; i++) {
+            document.write(`Test ${i + 1}  `);
+            for (const key in this.testList[i]) {
+              document.write(`${key} : ${this.testList[i][key]}  `);
+            }
+            document.write(`<br>`);
+          }
+          document.write(`<br>`);
+        }
+      }
+
+      class TestManager {
+        static managerRef;
+        constructor() {
+          if (TestManager.managerRef) return TestManager.managerRef;
+          TestManager.managerRef = this;
+        }
+        randomTest() {
+          return Math.floor(Math.random() * (1 + 1));
+        }
+        test(n) {
+          Hystory.testList = [];
+          for (let i = 0; i < n; i++) {
+            if (this.randomTest() > 0) Hystory.multiply();
+            else Hystory.add();
+          }
+          Hystory.toString();
+          setTimeout(() => this.test(n), 10000);
+        }
+      }
+      let mathTest = new TestManager();
+      mathTest.test(2);
+      //Чому перед другим виводом данних стирає виведену раніше інформацію
+    </script>
+  </body>
+</html>
